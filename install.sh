@@ -112,6 +112,18 @@ EOF
     ok "Default config created — edit ${CONFIG_DIR}/config.yaml before starting"
 }
 
+# ── create runtime directories ─────────────────────────────────────────────────
+
+create_dirs() {
+    info "Creating runtime directories..."
+    $SUDO mkdir -p /var/log/argus
+    # allow the user running argus to write logs
+    if [ -n "$SUDO" ]; then
+        $SUDO chown "$(id -un)" /var/log/argus 2>/dev/null || true
+    fi
+    ok "Directories ready"
+}
+
 # ── systemd (Linux) ────────────────────────────────────────────────────────────
 
 install_systemd() {
@@ -181,6 +193,7 @@ main() {
 
     fetch_latest_version
     install_binary
+    create_dirs
     create_config
 
     case "$OS_KEY" in
