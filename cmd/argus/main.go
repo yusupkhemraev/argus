@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"text/tabwriter"
@@ -91,6 +92,12 @@ func main() {
 				fmt.Println("done")
 			}
 			return
+		default:
+			if !strings.HasPrefix(os.Args[1], "-") {
+				fmt.Fprintf(os.Stderr, "unknown command: %s\n", os.Args[1])
+				fmt.Fprintln(os.Stderr, "available commands: start, stop, restart, service, status, history, logs, update, version")
+				os.Exit(1)
+			}
 		}
 	}
 	runDaemon(os.Args[1:])
