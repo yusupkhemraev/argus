@@ -1,0 +1,36 @@
+:root {
+  --bg-primary: #0A0A0A;
+  --bg-app: #0D0D11;
+  --bg-sidebar: #09090D;
+  --bg-elevated: #111118;
+  --bg-active: #1E1B4B;
+  --bg-topbar: #09090D;
+  --bg-input: #141420;
+  --border: #1E1E2E;
+  --border-row: #1A1A28;
+
+  --text-primary: #FAFAFA;
+  --text-secondary: #6B7280;
+  --text-tertiary: #4B5563;
+  --text-label: #6B6B8A;
+  --text-nav: #6B7280;
+  --text-nav-active: #C7D2FE;
+
+  --accent-green: #10B981;
+  --accent-red: #EF4444;
+  --accent-amber: #F59E0B;
+  --accent-cyan: #06B6D4;
+  --accent-purple: #818CF8;
+  --accent-green-bright: #22C55E;
+
+  --bar-memory: #6366F1;
+  --bar-cpu: #06B6D4;
+  --bar-disk: #F59E0B;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  --font-logo: 'Space Mono', monospace;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --radius-xs: 4px;
+}

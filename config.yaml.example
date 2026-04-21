@@ -1,0 +1,73 @@
+name: my-server
+
+collectors:
+    memory:
+        enabled: true
+        interval: 10m
+        threshold: 85
+        severity: warning
+    cpu:
+        enabled: true
+        interval: 5m
+        threshold: 90
+        severity: critical
+    disk:
+        enabled: true
+        interval: 30m
+        path: /
+        threshold: 80
+        severity: warning
+    nginx:
+        enabled: false
+        access_log: /var/log/nginx/access.log
+        watch_statuses:
+            - 500-599
+            - "429"
+        interval: 1m
+        threshold: 10
+        severity: critical
+        slow_threshold: 5.0
+        slow_window: 1m
+        slow_count: 5
+        # priority_routes:
+        #     - method: POST
+        #       pattern: /api/payments/*
+        #       min_count: 1
+        #       exclude_statuses:
+        #           - "499"
+    rabbitmq:
+        enabled: false
+        management_url: http://localhost:15672
+        username: guest
+        password: ""
+        interval: 30s
+        # queues:
+        #     - name: orders
+        #       threshold: 1000
+        #       unacked_threshold: 50
+        #       severity: warning
+
+notifiers:
+    telegram:
+        enabled: false
+        token: ""
+        chat_id: 0
+        # mentions:
+        #     - username
+    webhook:
+        enabled: false
+        url: ""
+        method: POST
+    log_path: ""
+
+history:
+    enabled: true
+    file_path: /var/log/argus/alarms.log
+    max_size_mb: 100
+    max_backups: 3
+
+server:
+    enabled: true
+    listen: 127.0.0.1:8080
+    username: ""
+    password: ""

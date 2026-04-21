@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}/${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+            asset: argus-linux-amd64
+          - os: linux
+            arch: arm64
+            asset: argus-linux-arm64
+          - os: darwin
+            arch: amd64
+            asset: argus-darwin-amd64
+          - os: darwin
+            arch: arm64
+            asset: argus-darwin-arm64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build web
+        run: cd web && npm ci && npm run build
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          go build \
+            -ldflags "-X main.version=${{ github.ref_name }}" \
+            -o bin/${{ matrix.asset }} \
+            ./cmd/argus
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: bin/${{ matrix.asset }}
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: bin
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "Argus ${{ github.ref_name }}" \
+            --generate-notes \
+            bin/argus-linux-amd64 \
+            bin/argus-linux-arm64 \
+            bin/argus-darwin-amd64 \
+            bin/argus-darwin-arm64 \
+            install.sh
