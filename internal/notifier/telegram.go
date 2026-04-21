@@ -99,7 +99,7 @@ func formatMessage(alarm collector.Alarm, serverName string, mentions []string) 
 	var b strings.Builder
 
 	switch alarm.Collector {
-	case "nginx":
+	case "nginx", "rabbitmq":
 		b.WriteString(fmt.Sprintf("%s <b>%s</b> • %s\n\n", severityIcon(alarm.Severity), collectorTitle(alarm.Collector), serverName))
 		if alarm.Message != "" {
 			b.WriteString(fmt.Sprintf("<blockquote>%s</blockquote>", alarm.Message))

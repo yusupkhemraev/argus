@@ -153,6 +153,9 @@ func runDaemon(args []string) {
 				cc = append(cc, nc)
 			}
 		}
+		if ccfg.RabbitMQ.Enabled {
+			cc = append(cc, collector.NewRabbitMQCollector(ccfg.RabbitMQ))
+		}
 		return cc
 	}
 

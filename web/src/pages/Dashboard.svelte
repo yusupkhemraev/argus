@@ -1,4 +1,5 @@
 <script>
+  import { tick } from 'svelte';
   import { TriangleAlert, Cpu, MemoryStick, HardDrive, Globe, ListFilter, Download } from 'lucide-svelte';
   import Topbar from '../components/Topbar.svelte';
   import StatCard from '../components/StatCard.svelte';
@@ -44,7 +45,10 @@
   let filterText = $state('');
   let filtering = $state(false);
 
-  function startFilter() { filtering = true; }
+  function startFilter() {
+    filtering = true;
+    tick().then(() => document.querySelector('.filter-input')?.focus());
+  }
   function clearFilter() { filtering = false; filterText = ''; filter.set(''); }
   function handleFilterKey(e) { if (e.key === 'Escape') clearFilter(); }
 
@@ -147,7 +151,6 @@
               bind:value={filterText}
               onkeydown={handleFilterKey}
               placeholder="type to filter..."
-              autofocus
             />
           </div>
         {:else}

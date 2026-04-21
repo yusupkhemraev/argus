@@ -570,6 +570,14 @@
               <span class="empty-hint">No queues configured</span>
             {/if}
           </div>
+          <div class="test-row">
+            <button class="btn-outline" onclick={() => testCollector('rabbitmq')} disabled={testCollectorLoading['rabbitmq']}>
+              {testCollectorLoading['rabbitmq'] ? 'Testing...' : 'Test'}
+            </button>
+            {#if testCollectorMsg['rabbitmq']}
+              <span class="test-result" class:alarm={testCollectorMsg['rabbitmq']?.startsWith('Alarm')}>{testCollectorMsg['rabbitmq']}</span>
+            {/if}
+          </div>
         </div>
       </div>
 
