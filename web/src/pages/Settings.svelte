@@ -861,7 +861,7 @@
     transition:border-color .15s; width:160px;
   }
   .field-input:focus { border-color:var(--accent-purple); }
-  .field-input.sm { width:70px; text-align:center; }
+  .field-input.sm { width:100px; text-align:center; }
   .field-input.wide { width:280px; }
 
   .toggle {
@@ -895,7 +895,10 @@
   .empty-hint { font-size:12px; color:var(--text-tertiary); padding:4px 0; }
   .detail-row.col { flex-direction:column; align-items:flex-start; gap:8px; }
   .json-example { margin:0; padding:10px 12px; background:var(--bg-tertiary); border-radius:6px; font-size:11px; color:var(--text-secondary); font-family:monospace; line-height:1.6; width:100%; box-sizing:border-box; white-space:pre; overflow-x:auto; }
-  .field-input.xs { width:55px; text-align:center; }
+  .field-input.xs { width:80px; text-align:center; }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+  input[type=number] { -moz-appearance:textfield; }
   .btn-outline.sm { padding:4px 10px; font-size:11px; }
 
   .test-row { display:flex; align-items:center; gap:12px; padding-top:8px; border-top:1px solid var(--border); margin-top:4px; }
