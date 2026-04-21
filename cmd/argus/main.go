@@ -24,6 +24,7 @@ import (
 	"github.com/yusupkhemraev/argus/internal/notifier"
 	"github.com/yusupkhemraev/argus/internal/server"
 	"github.com/yusupkhemraev/argus/internal/service"
+	"github.com/yusupkhemraev/argus/internal/updater"
 	"github.com/yusupkhemraev/argus/web"
 )
 
@@ -72,6 +73,23 @@ func main() {
 			return
 		case "--version", "version":
 			fmt.Printf("argus %s\n", version)
+			return
+		case "update":
+			fmt.Printf("Current version: %s\n", version)
+			fmt.Print("Checking for updates... ")
+			newVersion, err := updater.Update(version)
+			if err != nil {
+				fmt.Printf("\nerror: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Printf("updated to %s\n", newVersion)
+			fmt.Print("Restarting service... ")
+			if err := service.Restart(); err != nil {
+				fmt.Printf("\nwarning: restart failed: %v\n", err)
+				fmt.Println("Run: argus restart")
+			} else {
+				fmt.Println("done")
+			}
 			return
 		}
 	}
