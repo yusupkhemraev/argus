@@ -134,13 +134,29 @@
     config.collectors.nginx.priority_routes = config.collectors.nginx.priority_routes.filter((_, idx) => idx !== i);
   }
 
+  let ignoreInput = $state('');
+
   function addIgnoreRoute() {
+    const raw = ignoreInput.trim();
+    if (!raw) return;
+    const methods = ['GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'];
+    const parts = raw.split(/\s+/);
+    let method = '*', pattern = raw;
+    if (parts.length >= 2 && (methods.includes(parts[0].toUpperCase()) || parts[0] === '*')) {
+      method = parts[0].toUpperCase();
+      pattern = parts.slice(1).join(' ');
+    }
     if (!config.collectors.nginx.ignore_routes) config.collectors.nginx.ignore_routes = [];
-    config.collectors.nginx.ignore_routes = [...config.collectors.nginx.ignore_routes, { method: '*', pattern: '' }];
+    config.collectors.nginx.ignore_routes = [...config.collectors.nginx.ignore_routes, { method, pattern }];
+    ignoreInput = '';
   }
 
   function removeIgnoreRoute(i) {
     config.collectors.nginx.ignore_routes = config.collectors.nginx.ignore_routes.filter((_, idx) => idx !== i);
+  }
+
+  function ignoreRouteLabel(r) {
+    return r.method === '*' ? r.pattern : `${r.method} ${r.pattern}`;
   }
 
   function addRabbitQueue() {
@@ -498,22 +514,26 @@
           <div class="detail-section">
             <div class="detail-section-header">
               <span class="detail-label">Ignore routes</span>
-              <span class="field-hint">Requests matching these routes are never counted as errors or slow</span>
-              <div class="spacer"></div>
+              <span class="field-hint">Never counted as errors or slow</span>
+            </div>
+            <div class="ignore-input-row">
+              <input
+                class="field-input wide"
+                bind:value={ignoreInput}
+                placeholder="/health  or  GET /metrics  or  * /ping/*"
+                onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addIgnoreRoute(); } }}
+              />
               <button class="btn-outline sm" onclick={addIgnoreRoute}><Plus size={12} /><span>Add</span></button>
             </div>
             {#if config.collectors.nginx.ignore_routes?.length > 0}
-              {#each config.collectors.nginx.ignore_routes as route, i}
-                <div class="route-row">
-                  <select class="field-input xs" bind:value={route.method}>
-                    <option>*</option><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option><option>PATCH</option>
-                  </select>
-                  <input class="field-input wide" bind:value={route.pattern} placeholder="/health, /metrics, /api/v1/ping/*" />
-                  <button class="icon-btn" onclick={() => removeIgnoreRoute(i)}><Trash2 size={12} /></button>
-                </div>
-              {/each}
-            {:else}
-              <span class="empty-hint">No ignored routes configured</span>
+              <div class="ignore-chips">
+                {#each config.collectors.nginx.ignore_routes as route, i}
+                  <span class="ignore-chip">
+                    <span class="chip-label">{ignoreRouteLabel(route)}</span>
+                    <button class="chip-remove" onclick={() => removeIgnoreRoute(i)}>×</button>
+                  </span>
+                {/each}
+              </div>
             {/if}
           </div>
           <div class="live-stats">
@@ -928,6 +948,20 @@
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
   input[type=number] { -moz-appearance:textfield; }
   .btn-outline.sm { padding:4px 10px; font-size:11px; }
+
+  .ignore-input-row { display:flex; align-items:center; gap:8px; }
+  .ignore-chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .ignore-chip {
+    display:inline-flex; align-items:center; gap:4px; padding:3px 8px 3px 10px;
+    background:var(--bg-input); border:1px solid var(--border); border-radius:20px;
+    font-size:12px; font-family:var(--font-mono); color:var(--text-secondary);
+  }
+  .chip-label { line-height:1; }
+  .chip-remove {
+    background:none; border:none; color:var(--text-tertiary); cursor:pointer;
+    font-size:14px; line-height:1; padding:0 2px; display:flex; align-items:center;
+  }
+  .chip-remove:hover { color:var(--accent-red); }
 
   .test-row { display:flex; align-items:center; gap:12px; padding-top:8px; border-top:1px solid var(--border); margin-top:4px; }
   .test-result { font-size:12px; color:var(--accent-green); font-family:var(--font-mono); }
