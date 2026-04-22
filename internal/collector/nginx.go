@@ -506,6 +506,29 @@ func (n *NginxCollector) buildMessageSince(since time.Time) string {
 		return lines[i].count > lines[j].count
 	})
 
+	// minGroup filtered everything out — show all non-zero entries so message is never empty
+	if len(lines) == 0 {
+		for _, entry := range n.httpErrors {
+			c := entry.countSince(since)
+			if c == 0 {
+				continue
+			}
+			label := fmt.Sprintf("%s %s - %d", entry.Method, entry.Path, entry.Status)
+			lines = append(lines, endpointStat{label: label, count: c})
+		}
+		for _, entry := range n.slowReqs {
+			c := entry.countSince(since)
+			if c == 0 {
+				continue
+			}
+			label := fmt.Sprintf("🐢 %s %s (slow)", entry.Method, entry.Path)
+			lines = append(lines, endpointStat{label: label, count: c})
+		}
+		sort.Slice(lines, func(i, j int) bool {
+			return lines[i].count > lines[j].count
+		})
+	}
+
 	if len(lines) == 0 {
 		return "nginx errors detected"
 	}
