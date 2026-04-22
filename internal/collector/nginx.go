@@ -498,7 +498,7 @@ func (n *NginxCollector) buildMessageSince(since time.Time) string {
 		if c == 0 || c < minGroup {
 			continue
 		}
-		label := fmt.Sprintf("🐢 %s %s (slow)", entry.Method, entry.Path)
+		label := fmt.Sprintf("%s %s 🐢", entry.Method, entry.Path)
 		lines = append(lines, endpointStat{label: label, count: c})
 	}
 
@@ -521,7 +521,7 @@ func (n *NginxCollector) buildMessageSince(since time.Time) string {
 			if c == 0 {
 				continue
 			}
-			label := fmt.Sprintf("🐢 %s %s (slow)", entry.Method, entry.Path)
+			label := fmt.Sprintf("%s %s 🐢", entry.Method, entry.Path)
 			lines = append(lines, endpointStat{label: label, count: c})
 		}
 		sort.Slice(lines, func(i, j int) bool {
