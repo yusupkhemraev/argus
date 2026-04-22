@@ -81,6 +81,9 @@ func main() {
 			newVersion, err := updater.Update(version)
 			if err != nil {
 				fmt.Printf("\nerror: %v\n", err)
+				if os.Getuid() != 0 {
+					fmt.Fprintln(os.Stderr, "hint: try running with sudo")
+				}
 				os.Exit(1)
 			}
 			fmt.Printf("updated to %s\n", newVersion)
