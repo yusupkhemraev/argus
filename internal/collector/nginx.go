@@ -67,6 +67,11 @@ type parsedLine struct {
 	urt    float64
 }
 
+type compiledIgnore struct {
+	method string
+	re     *regexp.Regexp
+}
+
 type NginxCollector struct {
 	cfg config.NginxConfig
 
@@ -85,6 +90,7 @@ type NginxCollector struct {
 	idxURT         int
 	statusMatchers []statusMatcher
 	priorityRoutes []compiledRoute
+	ignoreRoutes   []compiledIgnore
 }
 
 func NewNginxCollector(cfg config.NginxConfig) (*NginxCollector, error) {
@@ -140,6 +146,18 @@ func NewNginxCollector(cfg config.NginxConfig) (*NginxCollector, error) {
 			re:              re,
 			minCount:        minCount,
 			excludeStatuses: excludes,
+		})
+	}
+
+	for _, ir := range cfg.IgnoreRoutes {
+		pattern := "^" + strings.ReplaceAll(regexp.QuoteMeta(ir.Pattern), `\*`, `[^?]*`) + "$"
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			continue
+		}
+		c.ignoreRoutes = append(c.ignoreRoutes, compiledIgnore{
+			method: strings.ToUpper(ir.Method),
+			re:     re,
 		})
 	}
 
@@ -210,9 +228,22 @@ func (n *NginxCollector) parseLine(line string) (parsedLine, bool) {
 	return p, true
 }
 
+func (n *NginxCollector) isIgnored(method, path string) bool {
+	for _, ir := range n.ignoreRoutes {
+		if (ir.method == "*" || ir.method == "" || ir.method == method) && ir.re.MatchString(path) {
+			return true
+		}
+	}
+	return false
+}
+
 func (n *NginxCollector) processLine(line string) {
 	p, ok := n.parseLine(line)
 	if !ok {
+		return
+	}
+
+	if n.isIgnored(p.method, p.path) {
 		return
 	}
 

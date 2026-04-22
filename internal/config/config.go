@@ -66,6 +66,12 @@ type NginxConfig struct {
 	SlowCount      int             `mapstructure:"slow_count" yaml:"slow_count,omitempty" json:"slow_count,omitempty"`
 	MinGroupCount  int             `mapstructure:"min_group_count" yaml:"min_group_count,omitempty" json:"min_group_count,omitempty"`
 	PriorityRoutes []PriorityRoute `mapstructure:"priority_routes" yaml:"priority_routes,omitempty" json:"priority_routes,omitempty"`
+	IgnoreRoutes   []IgnoreRoute   `mapstructure:"ignore_routes" yaml:"ignore_routes,omitempty" json:"ignore_routes,omitempty"`
+}
+
+type IgnoreRoute struct {
+	Method  string `mapstructure:"method" yaml:"method" json:"method"`
+	Pattern string `mapstructure:"pattern" yaml:"pattern" json:"pattern"`
 }
 
 type PriorityRoute struct {

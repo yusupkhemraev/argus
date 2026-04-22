@@ -134,6 +134,15 @@
     config.collectors.nginx.priority_routes = config.collectors.nginx.priority_routes.filter((_, idx) => idx !== i);
   }
 
+  function addIgnoreRoute() {
+    if (!config.collectors.nginx.ignore_routes) config.collectors.nginx.ignore_routes = [];
+    config.collectors.nginx.ignore_routes = [...config.collectors.nginx.ignore_routes, { method: '*', pattern: '' }];
+  }
+
+  function removeIgnoreRoute(i) {
+    config.collectors.nginx.ignore_routes = config.collectors.nginx.ignore_routes.filter((_, idx) => idx !== i);
+  }
+
   function addRabbitQueue() {
     if (!config.collectors.rabbitmq.queues) config.collectors.rabbitmq.queues = [];
     config.collectors.rabbitmq.queues = [...config.collectors.rabbitmq.queues, { name: '', threshold: 1000, unacked_threshold: 50, severity: 'warning' }];
@@ -484,6 +493,27 @@
               {/each}
             {:else}
               <span class="empty-hint">No priority routes configured</span>
+            {/if}
+          </div>
+          <div class="detail-section">
+            <div class="detail-section-header">
+              <span class="detail-label">Ignore routes</span>
+              <span class="field-hint">Requests matching these routes are never counted as errors or slow</span>
+              <div class="spacer"></div>
+              <button class="btn-outline sm" onclick={addIgnoreRoute}><Plus size={12} /><span>Add</span></button>
+            </div>
+            {#if config.collectors.nginx.ignore_routes?.length > 0}
+              {#each config.collectors.nginx.ignore_routes as route, i}
+                <div class="route-row">
+                  <select class="field-input xs" bind:value={route.method}>
+                    <option>*</option><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option><option>PATCH</option>
+                  </select>
+                  <input class="field-input wide" bind:value={route.pattern} placeholder="/health, /metrics, /api/v1/ping/*" />
+                  <button class="icon-btn" onclick={() => removeIgnoreRoute(i)}><Trash2 size={12} /></button>
+                </div>
+              {/each}
+            {:else}
+              <span class="empty-hint">No ignored routes configured</span>
             {/if}
           </div>
           <div class="live-stats">
