@@ -145,6 +145,8 @@ func (m *Manager) intervalFor(name string) time.Duration {
 		return m.cfg.Collectors.Disk.Interval
 	case "nginx":
 		return m.cfg.Collectors.Nginx.Interval
+	case "rabbitmq":
+		return m.cfg.Collectors.RabbitMQ.Interval
 	default:
 		return 30 * time.Second
 	}

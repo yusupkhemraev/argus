@@ -394,10 +394,8 @@
             <input class="field-input wide" bind:value={config.collectors.nginx.access_log} />
           </div>
           <div class="detail-row">
-            <span class="detail-label">Log format</span>
-            <span class="field-hint">Custom nginx log_format (leave empty for default combined)</span>
-            <div class="spacer"></div>
-            <input class="field-input wide" bind:value={config.collectors.nginx.log_format} placeholder="combined (default)" />
+            <span class="detail-label">Log parser</span>
+            <span class="field-hint">Looks for <code>"METHOD /path HTTP/x.x" STATUS</code> — works with any nginx format that includes <code>$request</code> and <code>$status</code>. Timings extracted from <code>rt:</code> / <code>request_time:</code> prefixes.</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Watch statuses</span>

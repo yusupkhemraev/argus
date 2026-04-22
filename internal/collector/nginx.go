@@ -96,23 +96,15 @@ func NewNginxCollector(cfg config.NginxConfig) (*NginxCollector, error) {
 		idxURT:     -1,
 	}
 
-	if cfg.LogFormat != "" {
-		re, err := buildRegexpFromFormat(cfg.LogFormat)
-		if err != nil {
-			return nil, fmt.Errorf("nginx: invalid log_format: %w", err)
-		}
-		c.lineRegexp = re
-	} else {
-		c.lineRegexp = regexp.MustCompile(
-			`"(?P<method>\w+)\s+(?P<path>[^\s]+)\s+HTTP/[\d.]+"\s+(?P<status>\d{3})`,
-		)
-	}
+	// Permissive pattern: finds request line + status regardless of surrounding fields.
+	// Timing is extracted via rtRegexp/urtRegexp fallback below.
+	c.lineRegexp = regexp.MustCompile(
+		`"(?P<method>\w+)\s+(?P<path>[^\s"]+)\s+HTTP/[\d.]+"\s+(?P<status>\d{3})`,
+	)
 
 	c.idxMethod = c.lineRegexp.SubexpIndex("method")
 	c.idxPath = c.lineRegexp.SubexpIndex("path")
 	c.idxStatus = c.lineRegexp.SubexpIndex("status")
-	c.idxRT = c.lineRegexp.SubexpIndex("request_time")
-	c.idxURT = c.lineRegexp.SubexpIndex("upstream_response_time")
 
 	c.rtRegexp = regexp.MustCompile(`(?:rt[=:]|request_time[=:])(\d+\.\d+)`)
 	c.urtRegexp = regexp.MustCompile(`(?:urt[=:]|upstream_response_time[=:])(\d+[\d.]*)`)
@@ -520,61 +512,6 @@ func parseStatusMatcher(s string) (statusMatcher, error) {
 	return statusMatcher{low: code, high: code}, nil
 }
 
-var nginxVarRe = regexp.MustCompile(`\$[a-z_]+`)
-
-func buildRegexpFromFormat(format string) (*regexp.Regexp, error) {
-	format = strings.TrimSpace(format)
-	for _, q := range []byte{'\''} {
-		format = strings.Trim(format, string(q))
-	}
-	format = strings.Join(strings.Fields(format), " ")
-
-	captures := map[string]string{
-		"request":                `(?P<method>\w+)\s+(?P<path>\S+)\s+HTTP/[\d.]+`,
-		"status":                `(?P<status>\d{3})`,
-		"request_time":          `(?P<request_time>[\d.]+|-)`,
-		"upstream_response_time": `(?P<upstream_response_time>[\d.]+|-)`,
-	}
-
-	numeric := map[string]bool{
-		"body_bytes_sent": true, "bytes_sent": true,
-		"connection": true, "connection_requests": true,
-		"request_length": true, "pid": true,
-	}
-
-	var b strings.Builder
-	pos := 0
-	for _, loc := range nginxVarRe.FindAllStringIndex(format, -1) {
-		literal := format[pos:loc[0]]
-		b.WriteString(regexp.QuoteMeta(literal))
-
-		varName := format[loc[0]+1 : loc[1]]
-
-		if pat, ok := captures[varName]; ok {
-			b.WriteString(pat)
-		} else if varName == "time_local" {
-			b.WriteString(`[^\]]+`)
-		} else if varName == "msec" {
-			b.WriteString(`[\d.]+`)
-		} else if numeric[varName] {
-			b.WriteString(`\d+`)
-		} else if strings.HasPrefix(varName, "http_") || varName == "remote_user" {
-			if loc[0] > 0 && format[loc[0]-1] == '"' {
-				b.WriteString(`[^"]*`)
-			} else {
-				b.WriteString(`\S+`)
-			}
-		} else {
-			b.WriteString(`\S+`)
-		}
-		pos = loc[1]
-	}
-	if pos < len(format) {
-		b.WriteString(regexp.QuoteMeta(format[pos:]))
-	}
-
-	return regexp.Compile(b.String())
-}
 
 func stripQuery(path string) string {
 	if i := strings.IndexByte(path, '?'); i >= 0 {

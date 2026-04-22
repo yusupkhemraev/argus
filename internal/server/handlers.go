@@ -165,7 +165,9 @@ func (s *Server) handleTestCollector(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if target == nil {
-		http.Error(w, "collector not found: "+name, http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"status": "error", "error": "collector not found: " + name})
 		return
 	}
 

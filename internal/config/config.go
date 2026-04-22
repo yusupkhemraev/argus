@@ -55,7 +55,6 @@ type DiskConfig struct {
 type NginxConfig struct {
 	Enabled        bool            `mapstructure:"enabled" yaml:"enabled" json:"enabled"`
 	AccessLog      string          `mapstructure:"access_log" yaml:"access_log" json:"access_log"`
-	LogFormat      string          `mapstructure:"log_format" yaml:"log_format,omitempty" json:"log_format,omitempty"`
 	WatchStatuses  []string        `mapstructure:"watch_statuses" yaml:"watch_statuses" json:"watch_statuses"`
 	Interval       time.Duration   `mapstructure:"interval" yaml:"interval" json:"interval"`
 	Refresh        time.Duration   `mapstructure:"refresh" yaml:"refresh" json:"refresh"`
